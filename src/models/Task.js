@@ -5,16 +5,21 @@ const taskSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  description: String,
+  description: { 
+    type: String, 
+    required: true },
   dueDate: Date,
   assigneeID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
   statusID: {
-    type: mongoose.Schema.Types.Number,
+    type: Number,
     ref: 'StatusEnum'
-  }
+  },
+  dependencies: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Task' }]
 });
 
 const Task = mongoose.model('Task', taskSchema);
