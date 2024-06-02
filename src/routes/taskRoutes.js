@@ -1,13 +1,15 @@
 const express = require('express');
 const { createTask, getAllTasks, updateTaskDetails, updateTaskStatus, getTaskDetails } = require('../controllers/taskController');
-const { verifyTokenAndRole } = require('../utils/jwtHelper');
+const { verifyToken,isManager } = require("../middlewares/auth");
+const {isTaskAssignedToUser}=require("../services/taskService");
+
 
 const router = express.Router();
 
-router.post('/', verifyTokenAndRole(['Manager']), createTask);
-router.get('/', verifyTokenAndRole(['Manager', 'User']), getAllTasks);
-router.patch('/:id', verifyTokenAndRole(['Manager']), updateTaskDetails);
-router.patch('/status/:id', verifyTokenAndRole(['User']), updateTaskStatus);
-router.get('/:id', verifyTokenAndRole(['Manager', 'User']), getTaskDetails);
+router.post('/', verifyToken,isManager, createTask);
+router.get('/', verifyToken,isManager,isTaskAssignedToUser, getAllTasks);// if manager then all, if user then owned tasks
+router.patch('/:id', verifyToken,isManager, updateTaskDetails);//manager
+router.patch('/status/:id', verifyToken,isTaskAssignedToUser, updateTaskStatus);//owner
+router.get('/:id', verifyToken,isManager,isTaskAssignedToUser, getTaskDetails);//owner or manager
 
 module.exports = router;
