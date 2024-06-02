@@ -9,11 +9,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Function to generate a JWT token that includes the user's role
 exports.generateToken = (user) => {
   const payload = {
-    id: user.id, // User's ID
-    email: user.email, // User's email
-    role: user.role, // User's role (e.g., 'Manager' or 'User')
+    id: user.id, 
+    email: user.email, 
+    role: user.role, 
   };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" }); // Token expires in 23 hour
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" }); 
 };
 
 // Middleware to verify a JWT token and the user's role
