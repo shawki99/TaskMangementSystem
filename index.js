@@ -1,20 +1,23 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const userRoutes = require('./routes/userRoutes');
-const taskRoutes = require('./routes/taskRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const taskRoutes = require('./src/routes/taskRoutes');
+require('dotenv').config();
+
 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/yourdbname', {
+mongoose.connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.log(err));
+console.log(process.env.CONNECTION_STRING);
 
 // Middleware
 app.use(bodyParser.json());

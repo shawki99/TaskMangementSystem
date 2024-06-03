@@ -1,9 +1,10 @@
 const express = require('express');
-const { register, login } = require('../controllers/userController');
+const { createUser, login } = require('../controllers/userController');
+const { isManager, verifyToken } = require('../middlewares/auth');
 
 const router = express.Router();
 
-router.post('/register', register); //manager only
+router.post('/create-user',verifyToken,isManager, createUser);
 router.post('/login', login);
 
 module.exports = router;

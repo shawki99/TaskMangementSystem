@@ -8,5 +8,5 @@ const roleEnumSchema = new mongoose.Schema({
   }
 });
 
-const RoleEnum = mongoose.model('RoleEnum', roleEnumSchema);
+const RoleEnum = mongoose.model('RoleEnum', roleEnumSchema,'RoleEnum');
 module.exports = RoleEnum;

@@ -1,3 +1,8 @@
+const { USER } = require("../constants/roles");
+const {
+  getTaskDependencies,
+  getTaskDependenciesDetails,
+} = require("../services/taskDependenciesService");
 const {
   createTask,
   findTasks,
@@ -5,16 +10,13 @@ const {
   findTaskById,
   saveTask,
   findTaskDetailsById,
-  isTaskAssignedToUser, 
+  isTaskAssignedToUser,
 } = require("../services/taskService");
 
 // Create a new task
 exports.createTask = async (req, res) => {
-  if (req.user.role !== "Manager") {
-    return res.status(403).send("Only managers can create tasks");
-  }
   try {
-    const task = await createTask(req.body);
+    const task = await createTask(req.body);//TODO:make restriction on the request body as the task data model as user data
     res.status(201).send(task);
   } catch (error) {
     res.status(400).send(error);
@@ -23,25 +25,22 @@ exports.createTask = async (req, res) => {
 
 // Retrieve a list of all tasks, with optional filtering
 exports.getAllTasks = async (req, res) => {
-  let query = Task.find();
-
-  // If the user is not a manager, filter tasks assigned to them
-  if (req.user.role !== "Manager") {
-    query.where("assigneeID", req.user._id);
+  const filters = {};
+  if (req.query.status) {
+    filters.statusID = req.query.status;
   }
-
-  // Additional filters
-  if (req.query.status) query.where("statusID", req.query.status);
-  if (req.query.assignee) query.where("assigneeID", req.query.assignee);
   if (req.query.dueDateStart && req.query.dueDateEnd) {
-    query
-      .where("dueDate")
-      .gte(new Date(req.query.dueDateStart))
-      .lte(new Date(req.query.dueDateEnd));
+    filters.dueDate = {
+      $gte: req.query.dueDateStart,
+      $lte: req.query.dueDateEnd,
+    };
+  }
+  if (req.user.role == USER) {
+    filters.assigneeID = req.user.id;
   }
 
   try {
-    const tasks = await findTasks(query);
+    const tasks = await findTasks(filters);
     res.send(tasks);
   } catch (error) {
     res.status(500).send(error);
@@ -50,12 +49,19 @@ exports.getAllTasks = async (req, res) => {
 
 // Update task details
 exports.updateTaskDetails = async (req, res) => {
-  if (req.user.role !== "Manager") {
-    return res.status(403).send("Only managers can update tasks");
-  }
   try {
-    const task = await findTaskByIdAndUpdate(req.params.id, req.body);
-    res.send(task);
+    const task=await findTaskById(req.params.id);
+    if (task) {
+      task.title=req.body.title?req.body.title:task.title;
+      task.description=req.body.description?req.body.description:task.description;
+      task.dueDate=req.body.dueDate?req.body.dueDate:task.dueDate;
+      task.assigneeID=req.body.assigneeID?req.body.assigneeID:task.assigneeID;
+      await saveTask(task);
+      res.json(task);
+    }
+    else{
+      res.status(400).json({msg:"Task is not Found"});
+    }
   } catch (error) {
     res.status(404).send(error);
   }
@@ -66,36 +72,27 @@ exports.updateTaskStatus = async (req, res) => {
   try {
     const task = await findTaskById(req.params.id);
     if (!task) return res.status(404).send("Task not found");
-
-    if (task.assigneeID.toString() !== req.user._id.toString()) {
-      return res
-        .status(403)
-        .send("You can only update status for tasks assigned to you");
-    }
     task.statusID = req.body.statusID;
     await saveTask(task);
-    res.send(task);
+    res.json(task);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ error });
   }
 };
 
 // Retrieve task details including dependencies
 exports.getTaskDetails = async (req, res) => {
   try {
-    const task = await findTaskDetailsById(req.params.id);
+    const taskID = req.params.id;
+    const task = await findTaskDetailsById(taskID);
+
     if (!task) return res.status(404).send("Task not found");
-
-    // Ensure the task belongs to the user if they are not a manager
-    if (
-      req.user.role !== "Manager" &&
-      task.assigneeID.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).send("You can only view tasks assigned to you");
-    }
-
-    res.send(task);
+    const dependencies = await getTaskDependenciesDetails(taskID);
+    return res.json({
+      ...task,
+      dependencies,
+    });
   } catch (error) {
-    res.status(500).send(error);
+    return res.status(500).json({ error });
   }
 };

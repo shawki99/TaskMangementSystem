@@ -11,5 +11,5 @@ const taskDependenciesSchema = new mongoose.Schema({
   }
 });
 
-const TaskDependencies = mongoose.model('TaskDependencies', taskDependenciesSchema);
+const TaskDependencies = mongoose.model('TaskDependencies', taskDependenciesSchema,'TaskDependencies');
 module.exports = TaskDependencies;

@@ -1,19 +1,16 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const permissionRoles = require("../constants/roles");
-const tServices=require("../services/taskService");
-const tControllers=require("../controllers/taskController");
-
+const { isTaskAssignedToUser } = require("../services/taskService");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Function to generate a JWT token that includes the user's role
 exports.generateToken = (user) => {
   const payload = {
-    id: user.id, 
-    email: user.email, 
-    role: user.role, 
+    id: user.id,
+    role: user.role,
   };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" }); 
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
 };
 
 // Middleware to verify a JWT token and the user's role
@@ -48,12 +45,10 @@ exports.isManager = (req, res, next) => {
     const userRole = req.user.role;
     const isFound = checkUserRole(userRole, [permissionRoles.MANAGER]);
     if (!isFound) {
-      res
-        .status(401)
-        .send({
-          message:
-            "Unauthorized: Your role does not have access to this resource",
-        });
+      return res.status(401).send({
+        message:
+          "Unauthorized: Your role does not have access to this resource",
+      });
     }
   } catch (err) {
     return res.status(401).send({ message: "Invalid Token" });
@@ -70,15 +65,33 @@ const checkUserRole = (userRole, permittedRoles) => {
 exports.isTaskOwner = (req, res, next) => {
   try {
     const userID = req.user.id;
-    const taskID=req.params.id;
-    const isFound =tControllers.getTaskDetails(req,res) || tServices.isTaskAssignedToUser(taskID,userID); //create function in services to make sure that the task id belong to this user
+    const taskID = req.params.id;
+    const isFound = isTaskAssignedToUser(taskID, userID);
     if (!isFound) {
-      res
-        .status(401)
-        .send({
-          message:
-            "Unauthorized: Your role does not have access to this resource",
-        });
+      return res.status(401).send({
+        message:
+          "Unauthorized: Your role does not have access to this resource",
+      });
+    }
+  } catch (err) {
+    return res.status(401).send({ message: "Invalid Token" });
+  }
+
+  return next();
+};
+
+exports.isManagerOrTaskOwner = (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const taskID = req.params.id;
+    const isFound =
+      checkUserRole(userRole, [permissionRoles.MANAGER]) ||
+      isTaskAssignedToUser(taskID, userID);
+    if (!isFound) {
+      return res.status(401).send({
+        message:
+          "Unauthorized: Your role does not have access to this resource",
+      });
     }
   } catch (err) {
     return res.status(401).send({ message: "Invalid Token" });

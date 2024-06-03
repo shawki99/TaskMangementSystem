@@ -8,5 +8,5 @@ const statusEnumSchema = new mongoose.Schema({
   }
 });
 
-const StatusEnum = mongoose.model('StatusEnum', statusEnumSchema);
+const StatusEnum = mongoose.model('StatusEnum', statusEnumSchema,'StatusEnum');
 module.exports = StatusEnum;

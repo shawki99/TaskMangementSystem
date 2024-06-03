@@ -6,12 +6,12 @@ exports.createTask = async (taskData) => {
     return task;
 };
 
-exports.findTasks = async (query) => {
-    return await query.exec();
+exports.findTasks = async (filters) => {
+    return await Task.find(filters);
 };
 
 exports.findTaskByIdAndUpdate = async (taskId, updateData) => {
-    return await Task.findByIdAndUpdate(taskId, updateData, { new: true });
+    return await Task.findByIdAndUpdate(taskId, updateData);
 };
 
 exports.findTaskById = async (taskId) => {
@@ -23,7 +23,7 @@ exports.saveTask = async (task) => {
 };
 
 exports.findTaskDetailsById = async (taskId) => {
-    return await Task.findById(taskId).populate('dependencies');
+    return await Task.findById(taskId);
 };
 
 exports.isTaskAssignedToUser = async (taskId, userId) => {

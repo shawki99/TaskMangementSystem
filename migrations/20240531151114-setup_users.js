@@ -1,9 +1,10 @@
+const bcrypt=require("bcrypt");
 module.exports = {
   async up(db, client) {
+    const pass=await bcrypt.hash("admin", 10)
     await db.collection('User').insertOne(
-      { userName: 'Admin' ,email:'admin@example.com' ,password:"9tPpO9CkR9r8icPuXIij5ONr7kwzk08qJBF2J8C7nxOQREm" ,roleID:1 }
-      //$2b$10$EK7AX/9tPpO9CkR9r8icPuXIij5ONr7kwzk08qJBF2J8C7nxOQREm
-      //userName,email,password,roleID
+      { userName: 'Admin' ,email:'admin@example.com' ,password:pass ,roleID:1 }
+      
     );
   },
 
