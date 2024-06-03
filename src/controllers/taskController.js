@@ -1,22 +1,20 @@
 const { USER } = require("../constants/roles");
 const {
-  getTaskDependencies,
   getTaskDependenciesDetails,
 } = require("../services/taskDependenciesService");
 const {
   createTask,
   findTasks,
-  findTaskByIdAndUpdate,
+
   findTaskById,
   saveTask,
   findTaskDetailsById,
-  isTaskAssignedToUser,
 } = require("../services/taskService");
 
 // Create a new task
 exports.createTask = async (req, res) => {
   try {
-    const task = await createTask(req.body);//TODO:make restriction on the request body as the task data model as user data
+    const task = await createTask(req.body);
     res.status(201).send(task);
   } catch (error) {
     res.status(400).send(error);
@@ -50,17 +48,20 @@ exports.getAllTasks = async (req, res) => {
 // Update task details
 exports.updateTaskDetails = async (req, res) => {
   try {
-    const task=await findTaskById(req.params.id);
+    const task = await findTaskById(req.params.id);
     if (task) {
-      task.title=req.body.title?req.body.title:task.title;
-      task.description=req.body.description?req.body.description:task.description;
-      task.dueDate=req.body.dueDate?req.body.dueDate:task.dueDate;
-      task.assigneeID=req.body.assigneeID?req.body.assigneeID:task.assigneeID;
+      task.title = req.body.title ? req.body.title : task.title;
+      task.description = req.body.description
+        ? req.body.description
+        : task.description;
+      task.dueDate = req.body.dueDate ? req.body.dueDate : task.dueDate;
+      task.assigneeID = req.body.assigneeID
+        ? req.body.assigneeID
+        : task.assigneeID;
       await saveTask(task);
       res.json(task);
-    }
-    else{
-      res.status(400).json({msg:"Task is not Found"});
+    } else {
+      res.status(400).json({ msg: "Task is not Found" });
     }
   } catch (error) {
     res.status(404).send(error);

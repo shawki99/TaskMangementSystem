@@ -10,7 +10,7 @@ exports.generateToken = (user) => {
     id: user.id,
     role: user.role,
   };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
+  return jwt.sign(payload, JWT_SECRET);
 };
 
 // Middleware to verify a JWT token and the user's role
@@ -28,11 +28,6 @@ exports.verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
-
-    // // Check if the user's role is allowed
-    // if (!roles.includes(decoded.role)) {
-    //   return res.status(401).send({ message: 'Unauthorized: Your role does not have access to this resource' });
-    // }
   } catch (err) {
     return res.status(401).send({ message: "Invalid Token" });
   }

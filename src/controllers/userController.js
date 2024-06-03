@@ -1,8 +1,4 @@
-const {
-  findUserByEmail,
-  createUser,
-  comparePassword,
-} = require("../services/userService");
+const { findUserByEmail, createUser } = require("../services/userService");
 const { generateToken } = require("../middlewares/auth");
 const bcrypt = require("bcrypt");
 
